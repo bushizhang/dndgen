@@ -223,44 +223,220 @@ button:disabled {
   line-height: 1.6;
 }
 
-.config-hint code {
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+.edit-error {
   font-size: 12px;
-  background: var(--bg-secondary);
-  padding: 1px 5px;
-  border-radius: 4px;
-  border: 0.5px solid var(--border);
+  color: #c0392b;
+  margin-top: 8px;
+  min-height: 18px;
 }
 
-.edit-area {
-  margin-bottom: 1rem;
+/* Config UI */
+.config-ui {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
-.edit-area textarea {
-  width: 100%;
-  min-height: 360px;
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-  font-size: 12px;
-  line-height: 1.6;
+.config-card {
   background: var(--bg);
   border: 0.5px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 12px;
+  border-radius: var(--radius-lg);
+  padding: 14px;
+}
+
+.config-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.config-label-input {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid transparent;
   color: var(--text);
-  resize: vertical;
+  outline: none;
+  padding: 2px 0;
+  min-width: 0;
+  transition: border-color 0.15s;
+}
+
+.config-label-input:focus {
+  border-bottom-color: var(--border-hover);
+}
+
+.config-dice-input {
+  width: 50px;
+  font-size: 12px;
+  text-align: center;
+  background: var(--bg-secondary);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 3px 6px;
+  color: var(--text-secondary);
   outline: none;
   transition: border-color 0.15s;
 }
 
-.edit-area textarea:focus {
+.config-dice-input:focus {
   border-color: var(--border-hover);
 }
 
-.edit-error {
+.config-remove-cat {
   font-size: 12px;
-  color: #c0392b;
-  margin-top: 6px;
-  min-height: 18px;
+  padding: 3px 9px;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+
+.config-note-input {
+  width: 100%;
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid transparent;
+  padding: 2px 0;
+  margin-bottom: 10px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.config-note-input:focus {
+  border-bottom-color: var(--border-hover);
+}
+
+.config-option-headers {
+  display: grid;
+  grid-template-columns: 1fr 56px 1fr;
+  gap: 8px;
+  padding: 0 32px 4px 0;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+.config-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+
+.config-option-row {
+  display: grid;
+  grid-template-columns: 1fr 56px 1fr 24px;
+  align-items: center;
+  gap: 8px;
+}
+
+.config-value-input {
+  font-size: 13px;
+  background: var(--bg-secondary);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 4px 8px;
+  color: var(--text);
+  outline: none;
+  width: 100%;
+  transition: border-color 0.15s;
+  font-family: inherit;
+}
+
+.config-value-input:focus {
+  border-color: var(--border-hover);
+}
+
+.config-weight-input {
+  font-size: 13px;
+  text-align: right;
+  background: var(--bg-secondary);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 4px 6px;
+  color: var(--text);
+  outline: none;
+  width: 100%;
+  transition: border-color 0.15s;
+  font-family: inherit;
+}
+
+.config-weight-input:focus {
+  border-color: var(--border-hover);
+}
+
+/* hide spinner arrows on weight input */
+.config-weight-input::-webkit-outer-spin-button,
+.config-weight-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.config-weight-input { -moz-appearance: textfield; }
+
+.config-weight-bar-wrap {
+  height: 6px;
+  background: var(--bg-secondary);
+  border-radius: 3px;
+  overflow: hidden;
+  border: 0.5px solid var(--border);
+}
+
+.config-weight-bar-fill {
+  height: 100%;
+  background: var(--text);
+  opacity: 0.35;
+  border-radius: 3px;
+  transition: width 0.2s ease;
+}
+
+.config-remove-option {
+  font-size: 15px;
+  line-height: 1;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.config-remove-option:hover {
+  background: var(--bg-secondary);
+  color: var(--text);
+}
+
+.config-add-option {
+  font-size: 12px;
+  padding: 4px 10px;
+  color: var(--text-secondary);
+  border-color: var(--border);
+  margin-top: 2px;
+}
+
+.config-add-cat {
+  width: 100%;
+  padding: 10px;
+  border: 0.5px dashed var(--border);
+  border-radius: var(--radius-lg);
+  color: var(--text-secondary);
+  font-size: 13px;
+  background: transparent;
+  font-family: inherit;
+}
+
+.config-add-cat:hover {
+  background: var(--bg);
+  border-color: var(--border-hover);
+  color: var(--text);
 }
 
 /* Animations */

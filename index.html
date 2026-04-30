@@ -38,15 +38,12 @@
 
     <div id="tab-config" style="display:none">
       <p class="config-hint">
-        Edit the JSON below to add, remove, or reweight any category.
-        Each option has a <code>value</code> and a <code>weight</code> — higher weight = more likely.
-        Weights are relative, not percentages.
+        Edit categories, options, and weights below. Higher weight = more likely to roll. Weights are relative, not percentages.
       </p>
-      <div class="edit-area">
-        <textarea id="configEditor" spellcheck="false"></textarea>
-        <div class="edit-error" id="editError"></div>
-      </div>
-      <div class="btn-row">
+      <div class="config-ui" id="configUI"></div>
+      <button class="config-add-cat" onclick="addCategory()">+ Add category</button>
+      <div class="edit-error" id="editError"></div>
+      <div class="btn-row" style="margin-top: 1rem">
         <button class="primary" onclick="saveConfig()">Save config</button>
         <button onclick="resetConfig()">Reset to default</button>
       </div>
