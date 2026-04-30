@@ -152,6 +152,33 @@ body {
   margin-bottom: 1rem;
 }
 
+.roll-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  padding-top: 6px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.roll-group-header:first-child {
+  padding-top: 0;
+}
+
+.roll-group-header:hover {
+  opacity: 1;
+}
+
+.roll-group-toggle {
+  font-size: 9px;
+}
+
 .roll-item {
   display: flex;
   justify-content: space-between;
@@ -290,6 +317,34 @@ button:disabled {
 
 .config-dice-input:focus {
   border-color: var(--border-hover);
+}
+
+.config-group-header {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  padding: 8px 2px 4px;
+  margin-top: 4px;
+}
+
+.config-group-header:first-child {
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.config-group-select {
+  font-size: 11px;
+  background: var(--bg-secondary);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 3px 5px;
+  color: var(--text-secondary);
+  outline: none;
+  cursor: pointer;
+  font-family: inherit;
 }
 
 .config-remove-cat {

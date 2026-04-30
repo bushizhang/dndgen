@@ -4,12 +4,20 @@
 // ============================================================
 
 let config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
-let rollQueue = config.slice();
+let rollQueue = [];
 let currentIdx = 0;
 let results = [];
+const renderedResults = new Map();
+const collapsedGroups = new Set();
+initRollQueue();
 
 function initRollQueue() {
-  rollQueue = config.slice();
+  const groupOrder = GROUPS.map(g => g.id);
+  rollQueue = [...config].sort((a, b) => {
+    const ai = groupOrder.indexOf(a.group ?? '');
+    const bi = groupOrder.indexOf(b.group ?? '');
+    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+  });
 }
 
 // --- Rolling ---
@@ -29,7 +37,7 @@ function rollOne() {
 
   const cat = rollQueue[currentIdx];
   const picked = weightedRoll(cat.options);
-  results.push({ cat: cat.label, value: picked.value, dice: cat.dice, note: cat.note, catIdx: currentIdx });
+  results.push({ cat: cat.label, value: picked.value, dice: cat.dice, note: cat.note, catIdx: currentIdx, group: cat.group });
 
   if (!cat.isSub && picked.subOptions?.length > 0) {
     rollQueue.splice(currentIdx + 1, 0, {
@@ -37,7 +45,8 @@ function rollOne() {
       dice: cat.dice,
       note: '',
       options: picked.subOptions,
-      isSub: true
+      isSub: true,
+      group: cat.group
     });
   }
 
@@ -61,14 +70,15 @@ function rollAll() {
   while (i < rollQueue.length) {
     const cat = rollQueue[i];
     const picked = weightedRoll(cat.options);
-    results.push({ cat: cat.label, value: picked.value, dice: cat.dice, note: cat.note, catIdx: i });
+    results.push({ cat: cat.label, value: picked.value, dice: cat.dice, note: cat.note, catIdx: i, group: cat.group });
     if (!cat.isSub && picked.subOptions?.length > 0) {
       rollQueue.splice(i + 1, 0, {
         label: picked.value + ' subclass',
         dice: cat.dice,
         note: '',
         options: picked.subOptions,
-        isSub: true
+        isSub: true,
+        group: cat.group
       });
     }
     i++;
@@ -99,7 +109,7 @@ function rerollLast() {
   currentIdx = lastCatIdx;
   const cat = rollQueue[currentIdx];
   const picked = weightedRoll(cat.options);
-  results.push({ cat: cat.label, value: picked.value, dice: cat.dice, note: cat.note, catIdx: currentIdx });
+  results.push({ cat: cat.label, value: picked.value, dice: cat.dice, note: cat.note, catIdx: currentIdx, group: cat.group });
 
   if (!cat.isSub && picked.subOptions?.length > 0) {
     rollQueue.splice(currentIdx + 1, 0, {
@@ -107,7 +117,8 @@ function rerollLast() {
       dice: cat.dice,
       note: '',
       options: picked.subOptions,
-      isSub: true
+      isSub: true,
+      group: cat.group
     });
   }
 
@@ -142,33 +153,43 @@ function animateResult(cat, picked) {
 
 function renderList() {
   const list = document.getElementById('rollsList');
-
-  // Remove excess nodes (reroll shrunk the results array)
-  while (list.children.length > results.length) {
-    list.removeChild(list.lastChild);
-  }
+  list.innerHTML = '';
+  let lastGroup = null;
 
   results.forEach((r, i) => {
-    if (i < list.children.length) {
-      // Node already exists — update text in place if it changed (reroll case)
-      const node = list.children[i];
-      const catSpan = node.querySelector('.roll-item-cat');
-      const valSpan = node.querySelector('.roll-item-val');
-      if (catSpan.textContent !== r.cat || valSpan.textContent !== r.value) {
-        catSpan.textContent = r.cat;
-        valSpan.textContent = r.value;
-        node.classList.remove('pop-in');
-        void node.offsetWidth;
-        node.classList.add('pop-in');
-      }
-    } else {
-      // New result — append with animation
-      const div = document.createElement('div');
-      div.className = 'roll-item pop-in';
-      div.innerHTML = `<span class="roll-item-cat">${r.cat}</span><span class="roll-item-val">${r.value}</span>`;
-      list.appendChild(div);
+    if (r.group && r.group !== lastGroup) {
+      const groupDef = GROUPS.find(g => g.id === r.group);
+      const label = groupDef ? groupDef.label : r.group;
+      const collapsed = collapsedGroups.has(r.group);
+      const groupId = r.group;
+
+      const header = document.createElement('div');
+      header.className = 'roll-group-header';
+      header.innerHTML = `<span>${label}</span><span class="roll-group-toggle">${collapsed ? '▸' : '▾'}</span>`;
+      header.onclick = () => {
+        collapsedGroups.has(groupId) ? collapsedGroups.delete(groupId) : collapsedGroups.add(groupId);
+        renderList();
+      };
+      list.appendChild(header);
+      lastGroup = r.group;
     }
+
+    if (collapsedGroups.has(r.group)) return;
+
+    const prev = renderedResults.get(i);
+    const isNew = !prev || prev.cat !== r.cat || prev.value !== r.value;
+
+    const div = document.createElement('div');
+    div.className = 'roll-item' + (isNew ? ' pop-in' : '');
+    div.innerHTML = `<span class="roll-item-cat">${r.cat}</span><span class="roll-item-val">${r.value}</span>`;
+    list.appendChild(div);
+
+    renderedResults.set(i, { cat: r.cat, value: r.value });
   });
+
+  for (const k of renderedResults.keys()) {
+    if (k >= results.length) renderedResults.delete(k);
+  }
 }
 
 function updateProgress() {
@@ -188,6 +209,8 @@ function setFinished() {
 function resetRoller() {
   currentIdx = 0;
   results = [];
+  renderedResults.clear();
+  collapsedGroups.clear();
   initRollQueue();
 
   document.getElementById('catLabel').textContent = 'Ready to roll';
@@ -230,6 +253,7 @@ function saveConfig() {
 
   for (const card of cards) {
     const label = card.querySelector('.config-label-input').value.trim();
+    const group = card.querySelector('.config-group-select').value;
     const dice  = card.querySelector('.config-dice-input').value.trim();
     const note  = card.querySelector('.config-note-input').value.trim();
     const id    = label.toLowerCase().replace(/\s+/g, '_') || 'category';
@@ -252,7 +276,7 @@ function saveConfig() {
       if (value) options.push(opt);
     }
 
-    if (label && options.length > 0) newConfig.push({ id, label, dice, note, options });
+    if (label && options.length > 0) newConfig.push({ id, label, group, dice, note, options });
   }
 
   if (newConfig.length === 0) {
@@ -276,7 +300,26 @@ function resetConfig() {
 function renderConfigUI(cfg) {
   const container = document.getElementById('configUI');
   container.innerHTML = '';
-  cfg.forEach(cat => container.appendChild(buildCategoryCard(cat)));
+
+  const groupOrder = GROUPS.map(g => g.id);
+  const sorted = [...cfg].sort((a, b) => {
+    const ai = groupOrder.indexOf(a.group ?? '');
+    const bi = groupOrder.indexOf(b.group ?? '');
+    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+  });
+
+  let lastGroup = null;
+  sorted.forEach(cat => {
+    if (cat.group !== lastGroup) {
+      const groupDef = GROUPS.find(g => g.id === cat.group);
+      const header = document.createElement('div');
+      header.className = 'config-group-header';
+      header.textContent = groupDef ? groupDef.label : (cat.group || 'Other');
+      container.appendChild(header);
+      lastGroup = cat.group;
+    }
+    container.appendChild(buildCategoryCard(cat));
+  });
 }
 
 function buildCategoryCard(cat) {
@@ -296,12 +339,22 @@ function buildCategoryCard(cat) {
   diceInput.value = cat.dice;
   diceInput.placeholder = 'd6';
 
+  const groupSelect = document.createElement('select');
+  groupSelect.className = 'config-group-select';
+  GROUPS.forEach(g => {
+    const opt = document.createElement('option');
+    opt.value = g.id;
+    opt.textContent = g.label;
+    if (g.id === cat.group) opt.selected = true;
+    groupSelect.appendChild(opt);
+  });
+
   const removeBtn = document.createElement('button');
   removeBtn.className = 'config-remove-cat';
   removeBtn.textContent = 'Remove';
   removeBtn.onclick = () => card.remove();
 
-  header.append(labelInput, diceInput, removeBtn);
+  header.append(labelInput, groupSelect, diceInput, removeBtn);
 
   const noteInput = document.createElement('input');
   noteInput.className = 'config-note-input';
@@ -492,6 +545,6 @@ function updateSubWeightBars(subList) {
 
 function addCategory() {
   const container = document.getElementById('configUI');
-  const newCat = { id: '', label: '', dice: 'd6', note: '', options: [{ value: '', weight: 1 }] };
+  const newCat = { id: '', label: '', group: GROUPS[0].id, dice: 'd6', note: '', options: [{ value: '', weight: 1 }] };
   container.appendChild(buildCategoryCard(newCat));
 }

@@ -13,9 +13,16 @@
 //  Equal weights = equal chance.
 // ============================================================
 
+const GROUPS = [
+  { id: 'character',   label: 'Character' },
+  { id: 'physical',    label: 'Physical traits' },
+  { id: 'personality', label: 'Personality' },
+];
+
 const DEFAULT_CONFIG = [
   {
     id: "race",
+    group: "character",
     label: "Race",
     dice: "d20",
     note: "Weighted by commonality in most settings",
@@ -35,6 +42,7 @@ const DEFAULT_CONFIG = [
   },
   {
     id: "class",
+    group: "character",
     label: "Class",
     dice: "d12",
     note: "Equal weight — all classes are equally valid",
@@ -139,6 +147,7 @@ const DEFAULT_CONFIG = [
   },
   {
     id: "background",
+    group: "character",
     label: "Background",
     dice: "d10",
     note: "Slightly weighted toward common folk",
@@ -158,6 +167,7 @@ const DEFAULT_CONFIG = [
   },
   {
     id: "alignment",
+    group: "personality",
     label: "Alignment",
     dice: "d9",
     note: "Neutral/good most common, chaotic evil rare",
@@ -175,6 +185,7 @@ const DEFAULT_CONFIG = [
   },
   {
     id: "motivation",
+    group: "personality",
     label: "Motivation",
     dice: "d8",
     note: "What drives them to adventure",
@@ -191,6 +202,7 @@ const DEFAULT_CONFIG = [
   },
   {
     id: "flaw",
+    group: "personality",
     label: "Character flaw",
     dice: "d6",
     note: "Equal weight — all flaws are equally juicy",
@@ -205,6 +217,7 @@ const DEFAULT_CONFIG = [
   },
   {
     id: "gender",
+    group: "physical",
     label: "Gender",
     dice: "d4",
     note: "Adjust to fit your setting",
@@ -217,6 +230,7 @@ const DEFAULT_CONFIG = [
   },
   {
     id: "hair_length",
+    group: "physical",
     label: "Hair length",
     dice: "d4",
     note: "Or bald — adventuring takes a toll",
@@ -229,6 +243,7 @@ const DEFAULT_CONFIG = [
   },
   {
     id: "hair_color",
+    group: "physical",
     label: "Hair color",
     dice: "d8",
     note: "Natural tones weighted higher",
@@ -245,6 +260,7 @@ const DEFAULT_CONFIG = [
   },
   {
     id: "eye_color",
+    group: "physical",
     label: "Eye color",
     dice: "d6",
     note: "Brown and blue dominate most species",
@@ -261,6 +277,7 @@ const DEFAULT_CONFIG = [
   },
   {
     id: "height",
+    group: "physical",
     label: "Height",
     dice: "d6",
     note: "Relative to average for their species",
@@ -274,6 +291,7 @@ const DEFAULT_CONFIG = [
   },
   {
     id: "build",
+    group: "physical",
     label: "Build",
     dice: "d6",
     note: "Physical frame and musculature",
@@ -288,6 +306,7 @@ const DEFAULT_CONFIG = [
   },
   {
     id: "distinguishing",
+    group: "physical",
     label: "Distinguishing feature",
     dice: "d8",
     note: "A visible physical quirk",
@@ -306,6 +325,7 @@ const DEFAULT_CONFIG = [
   },
   {
     id: "magic_item",
+    group: "character",
     label: "Starting magic item",
     dice: "d100",
     note: "Rarity weighted heavily — most start with nothing",
@@ -319,6 +339,7 @@ const DEFAULT_CONFIG = [
   },
   {
     id: "quirk",
+    group: "personality",
     label: "Personality quirk",
     dice: "d8",
     note: "Equal weight — each is equally fun",
@@ -335,6 +356,7 @@ const DEFAULT_CONFIG = [
   },
   {
     id: "dark_secret",
+    group: "personality",
     label: "Dark secret",
     dice: "d6",
     note: "Most adventurers carry no dark secret",
