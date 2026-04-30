@@ -120,6 +120,89 @@ const DEFAULT_CONFIG = [
     ]
   },
   {
+    id: "gender",
+    label: "Gender",
+    dice: "d4",
+    note: "Adjust to fit your setting",
+    options: [
+      { value: "Male",       weight: 40 },
+      { value: "Female",     weight: 40 },
+      { value: "Non-binary", weight: 10 },
+      { value: "Fluid",      weight: 10 }
+    ]
+  },
+  {
+    id: "hair_length",
+    label: "Hair length",
+    dice: "d4",
+    note: "Or bald — adventuring takes a toll",
+    options: [
+      { value: "Short",          weight: 30 },
+      { value: "Medium",         weight: 25 },
+      { value: "Long",           weight: 25 },
+      { value: "Shaved / Bald",  weight: 20 }
+    ]
+  },
+  {
+    id: "hair_color",
+    label: "Hair color",
+    dice: "d8",
+    note: "Natural tones weighted higher",
+    options: [
+      { value: "Black",          weight: 25 },
+      { value: "Dark brown",     weight: 22 },
+      { value: "Auburn",         weight: 12 },
+      { value: "Blonde",         weight: 14 },
+      { value: "Red",            weight: 8  },
+      { value: "Grey / White",   weight: 10 },
+      { value: "Silver (elven)", weight: 5  },
+      { value: "Unnatural hue",  weight: 4  }
+    ]
+  },
+  {
+    id: "eye_color",
+    label: "Eye color",
+    dice: "d6",
+    note: "Brown and blue dominate most species",
+    options: [
+      { value: "Brown",         weight: 32 },
+      { value: "Blue",          weight: 20 },
+      { value: "Green",         weight: 15 },
+      { value: "Grey",          weight: 13 },
+      { value: "Hazel",         weight: 12 },
+      { value: "Amber",         weight: 5  },
+      { value: "Violet (rare)", weight: 2  },
+      { value: "Silver (rare)", weight: 1  }
+    ]
+  },
+  {
+    id: "height",
+    label: "Height",
+    dice: "d6",
+    note: "Relative to average for their species",
+    options: [
+      { value: "Short",          weight: 15 },
+      { value: "Slightly short", weight: 25 },
+      { value: "Average",        weight: 30 },
+      { value: "Slightly tall",  weight: 20 },
+      { value: "Tall",           weight: 10 }
+    ]
+  },
+  {
+    id: "build",
+    label: "Build",
+    dice: "d6",
+    note: "Physical frame and musculature",
+    options: [
+      { value: "Lean",         weight: 25 },
+      { value: "Athletic",     weight: 25 },
+      { value: "Average",      weight: 20 },
+      { value: "Stocky",       weight: 15 },
+      { value: "Heavyset",     weight: 10 },
+      { value: "Wiry / Gaunt", weight: 5  }
+    ]
+  },
+  {
     id: "distinguishing",
     label: "Distinguishing feature",
     dice: "d8",
