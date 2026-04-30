@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>D&D Character Roller</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <div class="header">
+      <h1>D&D character roller</h1>
+      <p>Roll each category one at a time — or all at once</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('roller')">Roller</button>
+      <button class="tab" onclick="showTab('config')">Edit config</button>
+    </div>
+
+    <div id="tab-roller">
+      <div class="roll-area" id="rollArea">
+        <div class="category-label" id="catLabel">Ready to roll</div>
+        <div class="result-value" id="resultVal">—</div>
+        <div class="result-sub" id="resultSub"></div>
+        <div class="dice-badge" id="diceBadge"></div>
+      </div>
+
+      <div class="progress" id="progress"></div>
+      <div class="rolls-list" id="rollsList"></div>
+
+      <div class="btn-row">
+        <button class="primary" id="mainBtn" onclick="rollOne()">Start rolling</button>
+        <button id="allBtn" onclick="rollAll()">Roll all at once</button>
+        <button id="resetBtn" onclick="resetRoller()" style="display:none">Start over</button>
+      </div>
+    </div>
+
+    <div id="tab-config" style="display:none">
+      <p class="config-hint">
+        Edit the JSON below to add, remove, or reweight any category.
+        Each option has a <code>value</code> and a <code>weight</code> — higher weight = more likely.
+        Weights are relative, not percentages.
+      </p>
+      <div class="edit-area">
+        <textarea id="configEditor" spellcheck="false"></textarea>
+        <div class="edit-error" id="editError"></div>
+      </div>
+      <div class="btn-row">
+        <button class="primary" onclick="saveConfig()">Save config</button>
+        <button onclick="resetConfig()">Reset to default</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

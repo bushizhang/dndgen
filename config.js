@@ -1,0 +1,182 @@
+// ============================================================
+//  D&D CHARACTER ROLLER — CONFIG
+//
+//  Each category has:
+//    id      — unique key (no spaces)
+//    label   — displayed name
+//    dice    — flavor text shown as a badge (d6, d20, d100, etc.)
+//    note    — small description shown under the result
+//    options — array of { value, weight }
+//
+//  Weights are RELATIVE, not percentages.
+//  Double a weight to make something twice as likely.
+//  Equal weights = equal chance.
+// ============================================================
+
+const DEFAULT_CONFIG = [
+  {
+    id: "race",
+    label: "Race",
+    dice: "d20",
+    note: "Weighted by commonality in most settings",
+    options: [
+      { value: "Human",      weight: 30 },
+      { value: "Elf",        weight: 15 },
+      { value: "Dwarf",      weight: 12 },
+      { value: "Halfling",   weight: 10 },
+      { value: "Half-Elf",   weight: 8  },
+      { value: "Gnome",      weight: 7  },
+      { value: "Half-Orc",   weight: 6  },
+      { value: "Tiefling",   weight: 5  },
+      { value: "Dragonborn", weight: 4  },
+      { value: "Aasimar",    weight: 2  },
+      { value: "Genasi",     weight: 1  }
+    ]
+  },
+  {
+    id: "class",
+    label: "Class",
+    dice: "d12",
+    note: "Equal weight — all classes are equally valid",
+    options: [
+      { value: "Fighter",   weight: 1 },
+      { value: "Rogue",     weight: 1 },
+      { value: "Wizard",    weight: 1 },
+      { value: "Cleric",    weight: 1 },
+      { value: "Ranger",    weight: 1 },
+      { value: "Paladin",   weight: 1 },
+      { value: "Bard",      weight: 1 },
+      { value: "Druid",     weight: 1 },
+      { value: "Barbarian", weight: 1 },
+      { value: "Monk",      weight: 1 },
+      { value: "Warlock",   weight: 1 },
+      { value: "Sorcerer",  weight: 1 }
+    ]
+  },
+  {
+    id: "background",
+    label: "Background",
+    dice: "d10",
+    note: "Slightly weighted toward common folk",
+    options: [
+      { value: "Soldier",    weight: 12 },
+      { value: "Criminal",   weight: 12 },
+      { value: "Folk Hero",  weight: 12 },
+      { value: "Acolyte",    weight: 10 },
+      { value: "Outlander",  weight: 10 },
+      { value: "Sage",       weight: 8  },
+      { value: "Merchant",   weight: 8  },
+      { value: "Hermit",     weight: 8  },
+      { value: "Sailor",     weight: 8  },
+      { value: "Noble",      weight: 7  },
+      { value: "Charlatan",  weight: 5  }
+    ]
+  },
+  {
+    id: "alignment",
+    label: "Alignment",
+    dice: "d9",
+    note: "Neutral/good most common, chaotic evil rare",
+    options: [
+      { value: "Lawful Good",    weight: 15 },
+      { value: "Neutral Good",   weight: 18 },
+      { value: "Chaotic Good",   weight: 14 },
+      { value: "Lawful Neutral", weight: 12 },
+      { value: "True Neutral",   weight: 16 },
+      { value: "Chaotic Neutral",weight: 12 },
+      { value: "Lawful Evil",    weight: 6  },
+      { value: "Neutral Evil",   weight: 5  },
+      { value: "Chaotic Evil",   weight: 2  }
+    ]
+  },
+  {
+    id: "motivation",
+    label: "Motivation",
+    dice: "d8",
+    note: "What drives them to adventure",
+    options: [
+      { value: "Revenge",              weight: 14 },
+      { value: "Wealth",               weight: 16 },
+      { value: "Glory & Fame",         weight: 14 },
+      { value: "Duty / Oath",          weight: 12 },
+      { value: "Wanderlust",           weight: 12 },
+      { value: "Redemption",           weight: 10 },
+      { value: "Forbidden Knowledge",  weight: 8  },
+      { value: "Protecting loved ones",weight: 14 }
+    ]
+  },
+  {
+    id: "flaw",
+    label: "Character flaw",
+    dice: "d6",
+    note: "Equal weight — all flaws are equally juicy",
+    options: [
+      { value: "Cowardly when stakes are highest", weight: 1 },
+      { value: "Insufferably arrogant",            weight: 1 },
+      { value: "Can't resist a gamble",            weight: 1 },
+      { value: "Harbors a secret shame",           weight: 1 },
+      { value: "Distrusts everyone",               weight: 1 },
+      { value: "Reckless to a fault",              weight: 1 }
+    ]
+  },
+  {
+    id: "distinguishing",
+    label: "Distinguishing feature",
+    dice: "d8",
+    note: "A visible physical quirk",
+    options: [
+      { value: "Prominent facial scar", weight: 16 },
+      { value: "Unusual eye color",     weight: 14 },
+      { value: "Ritual tattoos",        weight: 12 },
+      { value: "Missing finger",        weight: 10 },
+      { value: "Unsettling pallor",     weight: 10 },
+      { value: "Heterochromia",         weight: 8  },
+      { value: "Streak of white hair",  weight: 8  },
+      { value: "Glowing faint mark",    weight: 6  },
+      { value: "Brand or burn scar",    weight: 8  },
+      { value: "Prosthetic limb",       weight: 8  }
+    ]
+  },
+  {
+    id: "magic_item",
+    label: "Starting magic item",
+    dice: "d100",
+    note: "Rarity weighted heavily — most start with nothing",
+    options: [
+      { value: "None",                                      weight: 55 },
+      { value: "Common trinket (e.g. everfull waterskin)",  weight: 22 },
+      { value: "Uncommon item (e.g. +1 weapon)",            weight: 14 },
+      { value: "Rare item (e.g. Bag of Holding)",           weight: 7  },
+      { value: "Very rare item (e.g. Ring of Spell Storing)",weight: 2 }
+    ]
+  },
+  {
+    id: "quirk",
+    label: "Personality quirk",
+    dice: "d8",
+    note: "Equal weight — each is equally fun",
+    options: [
+      { value: "Talks to inanimate objects",       weight: 1 },
+      { value: "Collects strange trinkets",        weight: 1 },
+      { value: "Can't resist any dare",            weight: 1 },
+      { value: "Quotes proverbs, often wrong",     weight: 1 },
+      { value: "Laughs at inappropriate times",    weight: 1 },
+      { value: "Never uses contractions",          weight: 1 },
+      { value: "Hums while thinking",              weight: 1 },
+      { value: "Overly formal with strangers",     weight: 1 }
+    ]
+  },
+  {
+    id: "dark_secret",
+    label: "Dark secret",
+    dice: "d6",
+    note: "Most adventurers carry no dark secret",
+    options: [
+      { value: "None",                              weight: 45 },
+      { value: "Minor (embarrassing past)",         weight: 25 },
+      { value: "Moderate (hurt someone they loved)",weight: 15 },
+      { value: "Serious (a crime unpunished)",      weight: 10 },
+      { value: "Grave (responsible for many deaths)",weight: 5 }
+    ]
+  }
+];
