@@ -26,14 +26,15 @@
         <div class="dice-badge" id="diceBadge"></div>
       </div>
 
-      <div class="progress" id="progress"></div>
-      <div class="rolls-list" id="rollsList"></div>
-
       <div class="btn-row">
         <button class="primary" id="mainBtn" onclick="rollOne()">Start rolling</button>
         <button id="allBtn" onclick="rollAll()">Roll all at once</button>
+        <button id="rerollBtn" onclick="rerollLast()" style="display:none">Reroll last</button>
         <button id="resetBtn" onclick="resetRoller()" style="display:none">Start over</button>
       </div>
+
+      <div class="progress" id="progress"></div>
+      <div class="rolls-list" id="rollsList"></div>
     </div>
 
     <div id="tab-config" style="display:none">

@@ -4,8 +4,13 @@
 // ============================================================
 
 let config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+let rollQueue = config.slice();
 let currentIdx = 0;
 let results = [];
+
+function initRollQueue() {
+  rollQueue = config.slice();
+}
 
 // --- Rolling ---
 
@@ -20,36 +25,105 @@ function weightedRoll(options) {
 }
 
 function rollOne() {
-  if (currentIdx >= config.length) return;
+  if (currentIdx >= rollQueue.length) return;
 
-  const cat = config[currentIdx];
+  const cat = rollQueue[currentIdx];
   const picked = weightedRoll(cat.options);
-  results.push({ cat: cat.label, value: picked.value, dice: cat.dice, note: cat.note });
+  results.push({ cat: cat.label, value: picked.value, dice: cat.dice, note: cat.note, catIdx: currentIdx });
+
+  if (!cat.isSub && picked.subOptions?.length > 0) {
+    rollQueue.splice(currentIdx + 1, 0, {
+      label: picked.value + ' subclass',
+      dice: cat.dice,
+      note: '',
+      options: picked.subOptions,
+      isSub: true
+    });
+  }
 
   animateResult(cat, picked);
   currentIdx++;
   renderList();
   updateProgress();
+  document.getElementById('rerollBtn').style.display = '';
 
-  if (currentIdx >= config.length) {
+  if (currentIdx >= rollQueue.length) {
     setFinished();
   } else {
-    document.getElementById('mainBtn').textContent = `Roll ${config[currentIdx].label} →`;
+    document.getElementById('mainBtn').textContent = `Roll ${rollQueue[currentIdx].label} →`;
   }
 }
 
 function rollAll() {
-  results = config.map(cat => {
+  initRollQueue();
+  results = [];
+  let i = 0;
+  while (i < rollQueue.length) {
+    const cat = rollQueue[i];
     const picked = weightedRoll(cat.options);
-    return { cat: cat.label, value: picked.value, dice: cat.dice, note: cat.note };
-  });
-  currentIdx = config.length;
+    results.push({ cat: cat.label, value: picked.value, dice: cat.dice, note: cat.note, catIdx: i });
+    if (!cat.isSub && picked.subOptions?.length > 0) {
+      rollQueue.splice(i + 1, 0, {
+        label: picked.value + ' subclass',
+        dice: cat.dice,
+        note: '',
+        options: picked.subOptions,
+        isSub: true
+      });
+    }
+    i++;
+  }
+  currentIdx = rollQueue.length;
+  document.getElementById('rerollBtn').style.display = '';
 
-  const last = results[results.length - 1];
-  animateResult(config[config.length - 1], { value: last.value });
+  animateResult(rollQueue[rollQueue.length - 1], results[results.length - 1]);
   renderList();
   updateProgress();
   setFinished();
+}
+
+function rerollLast() {
+  if (results.length === 0) return;
+
+  const lastCatIdx = results[results.length - 1].catIdx;
+  while (results.length > 0 && results[results.length - 1].catIdx === lastCatIdx) {
+    results.pop();
+  }
+
+  // If a sub-entry was queued after this position but not yet rolled, remove it
+  // so the fresh roll can insert an updated one if needed
+  if (rollQueue[lastCatIdx + 1]?.isSub) {
+    rollQueue.splice(lastCatIdx + 1, 1);
+  }
+
+  currentIdx = lastCatIdx;
+  const cat = rollQueue[currentIdx];
+  const picked = weightedRoll(cat.options);
+  results.push({ cat: cat.label, value: picked.value, dice: cat.dice, note: cat.note, catIdx: currentIdx });
+
+  if (!cat.isSub && picked.subOptions?.length > 0) {
+    rollQueue.splice(currentIdx + 1, 0, {
+      label: picked.value + ' subclass',
+      dice: cat.dice,
+      note: '',
+      options: picked.subOptions,
+      isSub: true
+    });
+  }
+
+  currentIdx++;
+  animateResult(cat, picked);
+  renderList();
+  updateProgress();
+
+  if (currentIdx >= rollQueue.length) {
+    setFinished();
+  } else {
+    document.getElementById('mainBtn').disabled = false;
+    document.getElementById('mainBtn').textContent = `Roll ${rollQueue[currentIdx].label} →`;
+    document.getElementById('allBtn').style.display = 'none';
+    document.getElementById('resetBtn').style.display = '';
+  }
 }
 
 // --- UI helpers ---
@@ -68,18 +142,39 @@ function animateResult(cat, picked) {
 
 function renderList() {
   const list = document.getElementById('rollsList');
-  list.innerHTML = results.map(r => `
-    <div class="roll-item">
-      <span class="roll-item-cat">${r.cat}</span>
-      <span class="roll-item-val">${r.value}</span>
-    </div>
-  `).join('');
+
+  // Remove excess nodes (reroll shrunk the results array)
+  while (list.children.length > results.length) {
+    list.removeChild(list.lastChild);
+  }
+
+  results.forEach((r, i) => {
+    if (i < list.children.length) {
+      // Node already exists — update text in place if it changed (reroll case)
+      const node = list.children[i];
+      const catSpan = node.querySelector('.roll-item-cat');
+      const valSpan = node.querySelector('.roll-item-val');
+      if (catSpan.textContent !== r.cat || valSpan.textContent !== r.value) {
+        catSpan.textContent = r.cat;
+        valSpan.textContent = r.value;
+        node.classList.remove('pop-in');
+        void node.offsetWidth;
+        node.classList.add('pop-in');
+      }
+    } else {
+      // New result — append with animation
+      const div = document.createElement('div');
+      div.className = 'roll-item pop-in';
+      div.innerHTML = `<span class="roll-item-cat">${r.cat}</span><span class="roll-item-val">${r.value}</span>`;
+      list.appendChild(div);
+    }
+  });
 }
 
 function updateProgress() {
   const el = document.getElementById('progress');
   el.textContent = currentIdx > 0
-    ? `${currentIdx} of ${config.length} rolled`
+    ? `${currentIdx} of ${rollQueue.length} rolled`
     : '';
 }
 
@@ -93,6 +188,7 @@ function setFinished() {
 function resetRoller() {
   currentIdx = 0;
   results = [];
+  initRollQueue();
 
   document.getElementById('catLabel').textContent = 'Ready to roll';
   document.getElementById('resultVal').textContent = '—';
@@ -102,6 +198,7 @@ function resetRoller() {
   document.getElementById('mainBtn').textContent = 'Start rolling';
   document.getElementById('mainBtn').disabled = false;
   document.getElementById('allBtn').style.display = '';
+  document.getElementById('rerollBtn').style.display = 'none';
   document.getElementById('resetBtn').style.display = 'none';
   document.getElementById('progress').textContent = '';
 }
@@ -138,10 +235,21 @@ function saveConfig() {
     const id    = label.toLowerCase().replace(/\s+/g, '_') || 'category';
 
     const options = [];
-    for (const row of card.querySelectorAll('.config-option-row')) {
-      const value  = row.querySelector('.config-value-input').value.trim();
-      const weight = parseFloat(row.querySelector('.config-weight-input').value) || 0;
-      if (value) options.push({ value, weight });
+    for (const group of card.querySelectorAll('.config-option-group')) {
+      const mainRow = group.querySelector('.config-option-row');
+      const value   = mainRow.querySelector('.config-value-input').value.trim();
+      const weight  = parseFloat(mainRow.querySelector('.config-weight-input').value) || 0;
+
+      const subOptions = [];
+      for (const subRow of group.querySelectorAll('.config-sub-option-row')) {
+        const sv = subRow.querySelector('.config-value-input').value.trim();
+        const sw = parseFloat(subRow.querySelector('.config-weight-input').value) || 0;
+        if (sv) subOptions.push({ value: sv, weight: sw });
+      }
+
+      const opt = { value, weight };
+      if (subOptions.length > 0) opt.subOptions = subOptions;
+      if (value) options.push(opt);
     }
 
     if (label && options.length > 0) newConfig.push({ id, label, dice, note, options });
@@ -208,9 +316,10 @@ function buildCategoryCard(cat) {
   optionsList.className = 'config-options-list';
 
   const total = cat.options.reduce((s, o) => s + o.weight, 0);
-  cat.options.forEach(opt => optionsList.appendChild(buildOptionRow(opt, total)));
+  cat.options.forEach(opt => optionsList.appendChild(buildOptionGroup(opt, total)));
 
   optionsList.addEventListener('input', e => {
+    if (e.target.closest('.config-sub-panel')) return;
     if (e.target.classList.contains('config-weight-input')) updateWeightBars(optionsList);
   });
 
@@ -218,7 +327,7 @@ function buildCategoryCard(cat) {
   addBtn.className = 'config-add-option';
   addBtn.textContent = '+ Add option';
   addBtn.onclick = () => {
-    optionsList.appendChild(buildOptionRow({ value: '', weight: 1 }, 1));
+    optionsList.appendChild(buildOptionGroup({ value: '', weight: 1 }, 1));
     updateWeightBars(optionsList);
   };
 
@@ -226,8 +335,11 @@ function buildCategoryCard(cat) {
   return card;
 }
 
-function buildOptionRow(opt, total) {
+function buildOptionGroup(opt, total) {
   const pct = total > 0 ? (opt.weight / total * 100) : 0;
+
+  const group = document.createElement('div');
+  group.className = 'config-option-group';
 
   const row = document.createElement('div');
   row.className = 'config-option-row';
@@ -250,29 +362,131 @@ function buildOptionRow(opt, total) {
   barFill.style.width = pct + '%';
   barWrap.appendChild(barFill);
 
+  const toggleBtn = document.createElement('button');
+  toggleBtn.className = 'config-toggle-sub';
+  toggleBtn.title = 'Sub-options';
+
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'config-remove-option';
+  removeBtn.textContent = '×';
+
+  row.append(valueInput, weightInput, barWrap, toggleBtn, removeBtn);
+
+  // Sub-options panel
+  const subPanel = document.createElement('div');
+  subPanel.className = 'config-sub-panel';
+  const hasExisting = opt.subOptions && opt.subOptions.length > 0;
+  subPanel.style.display = hasExisting ? '' : 'none';
+
+  const subList = document.createElement('div');
+  subList.className = 'config-sub-list';
+
+  if (hasExisting) {
+    const subTotal = opt.subOptions.reduce((s, o) => s + o.weight, 0);
+    opt.subOptions.forEach(sub => subList.appendChild(buildSubOptionRow(sub, subTotal)));
+  }
+
+  subList.addEventListener('input', e => {
+    if (e.target.classList.contains('config-weight-input')) updateSubWeightBars(subList);
+  });
+
+  const addSubBtn = document.createElement('button');
+  addSubBtn.className = 'config-add-sub-option';
+  addSubBtn.textContent = '+ Add sub-option';
+  addSubBtn.onclick = () => {
+    subList.appendChild(buildSubOptionRow({ value: '', weight: 1 }, 1));
+    updateSubWeightBars(subList);
+    syncToggleBtn(toggleBtn, subPanel, subList);
+  };
+
+  subPanel.append(subList, addSubBtn);
+  group.append(row, subPanel);
+
+  syncToggleBtn(toggleBtn, subPanel, subList);
+
+  toggleBtn.onclick = () => {
+    const isOpen = subPanel.style.display !== 'none';
+    subPanel.style.display = isOpen ? 'none' : '';
+    syncToggleBtn(toggleBtn, subPanel, subList);
+  };
+
+  removeBtn.onclick = () => {
+    const list = group.parentElement;
+    group.remove();
+    if (list) updateWeightBars(list);
+  };
+
+  return group;
+}
+
+function buildSubOptionRow(sub, total) {
+  const pct = total > 0 ? (sub.weight / total * 100) : 0;
+
+  const row = document.createElement('div');
+  row.className = 'config-sub-option-row';
+
+  const valueInput = document.createElement('input');
+  valueInput.className = 'config-value-input';
+  valueInput.value = sub.value;
+  valueInput.placeholder = 'Sub-option name';
+
+  const weightInput = document.createElement('input');
+  weightInput.className = 'config-weight-input';
+  weightInput.type = 'number';
+  weightInput.min = '0';
+  weightInput.value = sub.weight;
+
+  const barWrap = document.createElement('div');
+  barWrap.className = 'config-weight-bar-wrap';
+  const barFill = document.createElement('div');
+  barFill.className = 'config-weight-bar-fill';
+  barFill.style.width = pct + '%';
+  barWrap.appendChild(barFill);
+
   const removeBtn = document.createElement('button');
   removeBtn.className = 'config-remove-option';
   removeBtn.textContent = '×';
   removeBtn.onclick = () => {
-    const list = row.parentElement;
+    const subList  = row.parentElement;
+    const subPanel = subList?.parentElement;
+    const group    = subPanel?.parentElement;
     row.remove();
-    if (list) updateWeightBars(list);
+    if (subList) updateSubWeightBars(subList);
+    if (group) syncToggleBtn(group.querySelector('.config-toggle-sub'), subPanel, subList);
   };
 
   row.append(valueInput, weightInput, barWrap, removeBtn);
   return row;
 }
 
+function syncToggleBtn(btn, subPanel, subList) {
+  const count  = subList.querySelectorAll('.config-sub-option-row').length;
+  const isOpen = subPanel.style.display !== 'none';
+  btn.textContent = count > 0 ? (isOpen ? `▾ ${count}` : `▸ ${count}`) : (isOpen ? '▾' : '▸');
+  btn.classList.toggle('has-sub', count > 0);
+}
+
 function updateWeightBars(optionsList) {
-  const rows = optionsList.querySelectorAll('.config-option-row');
+  const groups = optionsList.querySelectorAll('.config-option-group');
   let total = 0;
-  rows.forEach(row => {
-    total += parseFloat(row.querySelector('.config-weight-input').value) || 0;
+  groups.forEach(g => {
+    total += parseFloat(g.querySelector('.config-option-row .config-weight-input').value) || 0;
   });
-  rows.forEach(row => {
-    const w = parseFloat(row.querySelector('.config-weight-input').value) || 0;
+  groups.forEach(g => {
+    const w   = parseFloat(g.querySelector('.config-option-row .config-weight-input').value) || 0;
     const pct = total > 0 ? (w / total * 100) : 0;
-    row.querySelector('.config-weight-bar-fill').style.width = pct + '%';
+    g.querySelector('.config-option-row .config-weight-bar-fill').style.width = pct + '%';
+  });
+}
+
+function updateSubWeightBars(subList) {
+  const rows = subList.querySelectorAll('.config-sub-option-row');
+  let total = 0;
+  rows.forEach(r => total += parseFloat(r.querySelector('.config-weight-input').value) || 0);
+  rows.forEach(r => {
+    const w   = parseFloat(r.querySelector('.config-weight-input').value) || 0;
+    const pct = total > 0 ? (w / total * 100) : 0;
+    r.querySelector('.config-weight-bar-fill').style.width = pct + '%';
   });
 }
 

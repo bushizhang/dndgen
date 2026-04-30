@@ -39,18 +39,102 @@ const DEFAULT_CONFIG = [
     dice: "d12",
     note: "Equal weight — all classes are equally valid",
     options: [
-      { value: "Fighter",   weight: 1 },
-      { value: "Rogue",     weight: 1 },
-      { value: "Wizard",    weight: 1 },
-      { value: "Cleric",    weight: 1 },
-      { value: "Ranger",    weight: 1 },
-      { value: "Paladin",   weight: 1 },
-      { value: "Bard",      weight: 1 },
-      { value: "Druid",     weight: 1 },
-      { value: "Barbarian", weight: 1 },
-      { value: "Monk",      weight: 1 },
-      { value: "Warlock",   weight: 1 },
-      { value: "Sorcerer",  weight: 1 }
+      { value: "Fighter",   weight: 1, subOptions: [
+          { value: "Champion",        weight: 1 },
+          { value: "Battle Master",   weight: 1 },
+          { value: "Eldritch Knight", weight: 1 },
+          { value: "Psi Warrior",     weight: 1 },
+          { value: "Rune Knight",     weight: 1 }
+        ]
+      },
+      { value: "Rogue",     weight: 1, subOptions: [
+          { value: "Thief",            weight: 1 },
+          { value: "Arcane Trickster", weight: 1 },
+          { value: "Assassin",         weight: 1 },
+          { value: "Swashbuckler",     weight: 1 },
+          { value: "Phantom",          weight: 1 }
+        ]
+      },
+      { value: "Wizard",    weight: 1, subOptions: [
+          { value: "Evocation",   weight: 1 },
+          { value: "Illusion",    weight: 1 },
+          { value: "Abjuration",  weight: 1 },
+          { value: "Divination",  weight: 1 },
+          { value: "Necromancy",  weight: 1 }
+        ]
+      },
+      { value: "Cleric",    weight: 1, subOptions: [
+          { value: "Life Domain",    weight: 1 },
+          { value: "Light Domain",   weight: 1 },
+          { value: "Trickery Domain",weight: 1 },
+          { value: "War Domain",     weight: 1 },
+          { value: "Tempest Domain", weight: 1 }
+        ]
+      },
+      { value: "Ranger",    weight: 1, subOptions: [
+          { value: "Hunter",         weight: 1 },
+          { value: "Gloom Stalker",  weight: 1 },
+          { value: "Beast Master",   weight: 1 },
+          { value: "Fey Wanderer",   weight: 1 },
+          { value: "Monster Slayer", weight: 1 }
+        ]
+      },
+      { value: "Paladin",   weight: 1, subOptions: [
+          { value: "Oath of Devotion",   weight: 1 },
+          { value: "Oath of the Ancients",weight: 1 },
+          { value: "Oath of Vengeance",  weight: 1 },
+          { value: "Oath of Conquest",   weight: 1 },
+          { value: "Oath of Redemption", weight: 1 }
+        ]
+      },
+      { value: "Bard",      weight: 1, subOptions: [
+          { value: "College of Lore",      weight: 1 },
+          { value: "College of Valor",     weight: 1 },
+          { value: "College of Glamour",   weight: 1 },
+          { value: "College of Swords",    weight: 1 },
+          { value: "College of Eloquence", weight: 1 }
+        ]
+      },
+      { value: "Druid",     weight: 1, subOptions: [
+          { value: "Circle of the Moon",  weight: 1 },
+          { value: "Circle of the Land",  weight: 1 },
+          { value: "Circle of Dreams",    weight: 1 },
+          { value: "Circle of Spores",    weight: 1 },
+          { value: "Circle of Stars",     weight: 1 }
+        ]
+      },
+      { value: "Barbarian", weight: 1, subOptions: [
+          { value: "Path of the Berserker",        weight: 1 },
+          { value: "Path of the Totem Warrior",    weight: 1 },
+          { value: "Path of the Ancestral Guardian",weight: 1 },
+          { value: "Path of the Storm Herald",     weight: 1 },
+          { value: "Path of the Zealot",           weight: 1 }
+        ]
+      },
+      { value: "Monk",      weight: 1, subOptions: [
+          { value: "Way of the Open Hand",    weight: 1 },
+          { value: "Way of Shadow",           weight: 1 },
+          { value: "Way of the Kensei",       weight: 1 },
+          { value: "Way of the Drunken Master",weight: 1 },
+          { value: "Way of the Astral Self",  weight: 1 }
+        ]
+      },
+      { value: "Warlock",   weight: 1, subOptions: [
+          { value: "The Fiend",        weight: 1 },
+          { value: "The Great Old One",weight: 1 },
+          { value: "The Archfey",      weight: 1 },
+          { value: "The Hexblade",     weight: 1 },
+          { value: "The Celestial",    weight: 1 }
+        ]
+      },
+      { value: "Sorcerer",  weight: 1, subOptions: [
+          { value: "Draconic Bloodline", weight: 1 },
+          { value: "Wild Magic",         weight: 1 },
+          { value: "Shadow Magic",       weight: 1 },
+          { value: "Divine Soul",        weight: 1 },
+          { value: "Aberrant Mind",      weight: 1 }
+        ]
+      }
     ]
   },
   {
