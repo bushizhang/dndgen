@@ -32,6 +32,35 @@ function weightedRoll(options) {
   return options[options.length - 1];
 }
 
+// A picked option can trigger one or more follow-up rolls (e.g. a class picks
+// a subclass, and Cleric/Paladin also pick a deity). Inserts them into the
+// queue right after insertIdx and returns how many were added.
+function spawnFollowUps(cat, picked, insertIdx) {
+  if (cat.isSub) return 0;
+
+  const specs = [];
+  if (picked.subOptions?.length > 0) {
+    specs.push({ suffix: 'subclass', dice: cat.dice, note: '', options: picked.subOptions });
+  }
+  const deityTrigger = CLASS_DEITY_TRIGGERS[picked.value];
+  if (cat.id === 'class' && deityTrigger) {
+    specs.push({ suffix: 'deity', dice: deityTrigger.dice, note: deityTrigger.note, options: deityTrigger.options });
+  }
+
+  specs.forEach((spec, i) => {
+    rollQueue.splice(insertIdx + i, 0, {
+      label: picked.value + ' ' + spec.suffix,
+      dice: spec.dice,
+      note: spec.note,
+      options: spec.options,
+      isSub: true,
+      group: cat.group
+    });
+  });
+
+  return specs.length;
+}
+
 function rollOne() {
   if (currentIdx >= rollQueue.length) return;
 
@@ -39,16 +68,7 @@ function rollOne() {
   const picked = weightedRoll(cat.options);
   results.push({ cat: cat.label, value: picked.value, dice: cat.dice, note: cat.note, catIdx: currentIdx, group: cat.group });
 
-  if (!cat.isSub && picked.subOptions?.length > 0) {
-    rollQueue.splice(currentIdx + 1, 0, {
-      label: picked.value + ' subclass',
-      dice: cat.dice,
-      note: '',
-      options: picked.subOptions,
-      isSub: true,
-      group: cat.group
-    });
-  }
+  spawnFollowUps(cat, picked, currentIdx + 1);
 
   animateResult(cat, picked);
   currentIdx++;
@@ -71,16 +91,7 @@ function rollAll() {
     const cat = rollQueue[i];
     const picked = weightedRoll(cat.options);
     results.push({ cat: cat.label, value: picked.value, dice: cat.dice, note: cat.note, catIdx: i, group: cat.group });
-    if (!cat.isSub && picked.subOptions?.length > 0) {
-      rollQueue.splice(i + 1, 0, {
-        label: picked.value + ' subclass',
-        dice: cat.dice,
-        note: '',
-        options: picked.subOptions,
-        isSub: true,
-        group: cat.group
-      });
-    }
+    spawnFollowUps(cat, picked, i + 1);
     i++;
   }
   currentIdx = rollQueue.length;
@@ -100,9 +111,9 @@ function rerollLast() {
     results.pop();
   }
 
-  // If a sub-entry was queued after this position but not yet rolled, remove it
-  // so the fresh roll can insert an updated one if needed
-  if (rollQueue[lastCatIdx + 1]?.isSub) {
+  // If sub-entries were queued after this position but not yet rolled, remove them
+  // so the fresh roll can insert updated ones if needed
+  while (rollQueue[lastCatIdx + 1]?.isSub) {
     rollQueue.splice(lastCatIdx + 1, 1);
   }
 
@@ -111,16 +122,7 @@ function rerollLast() {
   const picked = weightedRoll(cat.options);
   results.push({ cat: cat.label, value: picked.value, dice: cat.dice, note: cat.note, catIdx: currentIdx, group: cat.group });
 
-  if (!cat.isSub && picked.subOptions?.length > 0) {
-    rollQueue.splice(currentIdx + 1, 0, {
-      label: picked.value + ' subclass',
-      dice: cat.dice,
-      note: '',
-      options: picked.subOptions,
-      isSub: true,
-      group: cat.group
-    });
-  }
+  spawnFollowUps(cat, picked, currentIdx + 1);
 
   currentIdx++;
   animateResult(cat, picked);
