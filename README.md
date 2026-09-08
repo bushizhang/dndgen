@@ -1,4 +1,4 @@
-# D&D Character Roller
+# DnDGen
 
 A weighted random character generator inspired by "Roll for Sandwich" and Pokédex fillers — but for D&D characters.
 

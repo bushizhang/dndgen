@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>D&D Character Roller</title>
+  <title>DnDGen</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div id="app">
     <div class="header">
-      <h1>D&D character roller</h1>
+      <h1>DnDGen</h1>
       <p>Roll each category one at a time — or all at once</p>
     </div>
 
@@ -31,6 +31,7 @@
         <div class="btn-row-secondary">
           <button id="allBtn" onclick="rollAll()" title="Shortcut: A">Roll all at once<span class="hotkey">A</span></button>
           <button id="rerollBtn" onclick="rerollLast()" style="display:none" title="Shortcut: R">Reroll last<span class="hotkey">R</span></button>
+          <button id="exportBtn" onclick="exportImage()" style="display:none" title="Shortcut: E">Export as image<span class="hotkey">E</span></button>
           <button id="resetBtn" onclick="resetRoller()" style="display:none" title="Shortcut: S">Start over<span class="hotkey">S</span></button>
         </div>
       </div>
@@ -55,5 +56,9 @@
 
   <script src="config.js"></script>
   <script src="app.js"></script>
+
+  <!-- GoatCounter analytics -->
+  <script data-goatcounter="https://thisillusion.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

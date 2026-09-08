@@ -209,6 +209,7 @@ function setFinished() {
   setMainBtnLabel('Done!');
   document.getElementById('mainBtn').disabled = true;
   document.getElementById('allBtn').style.display = 'none';
+  document.getElementById('exportBtn').style.display = '';
 }
 
 function resetRoller() {
@@ -227,8 +228,149 @@ function resetRoller() {
   document.getElementById('mainBtn').disabled = false;
   document.getElementById('allBtn').style.display = '';
   document.getElementById('rerollBtn').style.display = 'none';
+  document.getElementById('exportBtn').style.display = 'none';
   document.getElementById('resetBtn').style.display = 'none';
   document.getElementById('progress').textContent = '';
+}
+
+// --- Export ---
+
+const EXPORT_FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif';
+
+function wrapText(ctx, text, maxWidth) {
+  const words = text.split(' ');
+  const lines = [];
+  let line = '';
+  words.forEach(word => {
+    const test = line ? line + ' ' + word : word;
+    if (line && ctx.measureText(test).width > maxWidth) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = test;
+    }
+  });
+  if (line) lines.push(line);
+  return lines;
+}
+
+function exportImage() {
+  if (results.length === 0) return;
+
+  const style = getComputedStyle(document.documentElement);
+  const colors = {
+    bg: style.getPropertyValue('--bg').trim(),
+    bgSecondary: style.getPropertyValue('--bg-secondary').trim(),
+    text: style.getPropertyValue('--text').trim(),
+    textSecondary: style.getPropertyValue('--text-secondary').trim(),
+    accent: style.getPropertyValue('--accent').trim()
+  };
+
+  const width = 640;
+  const paddingX = 32;
+  const rowPaddingX = 14;
+  const rowGap = 8;
+  const lineHeight = 18;
+  const rowVPadding = 12;
+  const groupGapTop = 28;
+  const groupHeaderHeight = 24;
+  const titleHeight = 64;
+  const bottomPadding = 32;
+
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+
+  // Group consecutive results by their group id.
+  const grouped = [];
+  results.forEach(r => {
+    const last = grouped[grouped.length - 1];
+    if (!last || last.group !== r.group) grouped.push({ group: r.group, items: [r] });
+    else last.items.push(r);
+  });
+
+  // Measure pass: wrap each value and record line counts.
+  const rowInnerWidth = width - paddingX * 2 - rowPaddingX * 2;
+  ctx.font = `600 13px ${EXPORT_FONT}`;
+  grouped.forEach(g => {
+    g.items.forEach(item => {
+      item._lines = wrapText(ctx, item.value, rowInnerWidth);
+    });
+  });
+
+  let height = titleHeight;
+  grouped.forEach(g => {
+    height += groupGapTop + groupHeaderHeight;
+    g.items.forEach(item => {
+      height += rowVPadding * 2 + lineHeight * item._lines.length + rowGap;
+    });
+  });
+  height += bottomPadding;
+
+  const scale = window.devicePixelRatio || 1;
+  canvas.width = width * scale;
+  canvas.height = height * scale;
+  ctx.scale(scale, scale);
+
+  ctx.fillStyle = colors.bg;
+  ctx.fillRect(0, 0, width, height);
+
+  ctx.fillStyle = colors.text;
+  ctx.font = `600 22px ${EXPORT_FONT}`;
+  ctx.fillText('DnDGen', paddingX, 38);
+
+  ctx.fillStyle = colors.textSecondary;
+  ctx.font = `13px ${EXPORT_FONT}`;
+  ctx.fillText(new Date().toLocaleDateString(), paddingX, 58);
+
+  let y = titleHeight;
+  grouped.forEach(g => {
+    const groupDef = GROUPS.find(gd => gd.id === g.group);
+    const label = (groupDef ? groupDef.label : g.group || '').toUpperCase();
+
+    y += groupGapTop;
+    ctx.fillStyle = colors.textSecondary;
+    ctx.font = `600 11px ${EXPORT_FONT}`;
+    ctx.fillText(label, paddingX, y + 8);
+    y += groupHeaderHeight;
+
+    g.items.forEach(item => {
+      const rowHeight = rowVPadding * 2 + lineHeight * item._lines.length;
+      roundRect(ctx, paddingX, y, width - paddingX * 2, rowHeight, 8);
+      ctx.fillStyle = colors.bgSecondary;
+      ctx.fill();
+
+      ctx.fillStyle = colors.textSecondary;
+      ctx.font = `12px ${EXPORT_FONT}`;
+      ctx.fillText(item.cat, paddingX + rowPaddingX, y + rowVPadding + 10);
+
+      ctx.fillStyle = colors.text;
+      ctx.font = `600 13px ${EXPORT_FONT}`;
+      item._lines.forEach((line, i) => {
+        ctx.fillText(line, paddingX + rowPaddingX, y + rowVPadding + 26 + i * lineHeight);
+      });
+
+      y += rowHeight + rowGap;
+    });
+  });
+
+  canvas.toBlob(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'dnd-character.png';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
 }
 
 // --- Hotkeys ---
@@ -241,6 +383,7 @@ document.addEventListener('keydown', (e) => {
   const mainBtn = document.getElementById('mainBtn');
   const allBtn = document.getElementById('allBtn');
   const rerollBtn = document.getElementById('rerollBtn');
+  const exportBtn = document.getElementById('exportBtn');
   const resetBtn = document.getElementById('resetBtn');
 
   switch (e.code) {
@@ -254,6 +397,9 @@ document.addEventListener('keydown', (e) => {
       break;
     case 'KeyR':
       if (rerollBtn.style.display !== 'none') rerollBtn.click();
+      break;
+    case 'KeyE':
+      if (exportBtn.style.display !== 'none') exportBtn.click();
       break;
     case 'KeyS':
       if (resetBtn.style.display !== 'none') resetBtn.click();
