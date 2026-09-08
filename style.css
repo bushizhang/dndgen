@@ -189,10 +189,6 @@ body {
   font-size: 13px;
 }
 
-.roll-item.pop-in {
-  animation: popIn 0.25s ease-out;
-}
-
 .roll-item-cat {
   color: var(--text-secondary);
 }
@@ -202,6 +198,10 @@ body {
   color: var(--text);
   text-align: right;
   max-width: 60%;
+}
+
+.roll-item-val.pop-in {
+  animation: popIn 0.25s ease-out;
 }
 
 /* Buttons */
@@ -245,6 +245,16 @@ button:disabled {
   opacity: 0.4;
   cursor: default;
   transform: none;
+}
+
+.hotkey {
+  opacity: 0.55;
+  font-size: 0.85em;
+  margin-left: 0.4em;
+}
+
+button.primary .hotkey {
+  opacity: 0.7;
 }
 
 /* Config tab */

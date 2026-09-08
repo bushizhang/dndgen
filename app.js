@@ -11,6 +11,10 @@ const renderedResults = new Map();
 const collapsedGroups = new Set();
 initRollQueue();
 
+function setMainBtnLabel(text) {
+  document.getElementById('mainBtn').innerHTML = `${text}<span class="hotkey">Space</span>`;
+}
+
 function initRollQueue() {
   const groupOrder = GROUPS.map(g => g.id);
   rollQueue = [...config].sort((a, b) => {
@@ -75,11 +79,12 @@ function rollOne() {
   renderList();
   updateProgress();
   document.getElementById('rerollBtn').style.display = '';
+  document.getElementById('resetBtn').style.display = '';
 
   if (currentIdx >= rollQueue.length) {
     setFinished();
   } else {
-    document.getElementById('mainBtn').textContent = `Roll ${rollQueue[currentIdx].label} →`;
+    setMainBtnLabel(`Roll ${rollQueue[currentIdx].label} →`);
   }
 }
 
@@ -95,7 +100,8 @@ function rollAll() {
     i++;
   }
   currentIdx = rollQueue.length;
-  document.getElementById('rerollBtn').style.display = '';
+  document.getElementById('rerollBtn').style.display = 'none';
+  document.getElementById('resetBtn').style.display = '';
 
   animateResult(rollQueue[rollQueue.length - 1], results[results.length - 1]);
   renderList();
@@ -133,24 +139,22 @@ function rerollLast() {
     setFinished();
   } else {
     document.getElementById('mainBtn').disabled = false;
-    document.getElementById('mainBtn').textContent = `Roll ${rollQueue[currentIdx].label} →`;
-    document.getElementById('allBtn').style.display = 'none';
-    document.getElementById('resetBtn').style.display = '';
+    setMainBtnLabel(`Roll ${rollQueue[currentIdx].label} →`);
   }
 }
 
 // --- UI helpers ---
 
 function animateResult(cat, picked) {
-  const area = document.getElementById('rollArea');
-  area.classList.remove('spinning');
-  void area.offsetWidth; // force reflow to restart animation
-  area.classList.add('spinning');
-
   document.getElementById('catLabel').textContent = cat.label;
-  document.getElementById('resultVal').textContent = picked.value;
   document.getElementById('resultSub').textContent = cat.note || '';
   document.getElementById('diceBadge').textContent = cat.dice;
+
+  const val = document.getElementById('resultVal');
+  val.classList.remove('spinning');
+  void val.offsetWidth; // force reflow to restart animation
+  val.classList.add('spinning');
+  val.textContent = picked.value;
 }
 
 function renderList() {
@@ -182,8 +186,8 @@ function renderList() {
     const isNew = !prev || prev.cat !== r.cat || prev.value !== r.value;
 
     const div = document.createElement('div');
-    div.className = 'roll-item' + (isNew ? ' pop-in' : '');
-    div.innerHTML = `<span class="roll-item-cat">${r.cat}</span><span class="roll-item-val">${r.value}</span>`;
+    div.className = 'roll-item';
+    div.innerHTML = `<span class="roll-item-cat">${r.cat}</span><span class="roll-item-val${isNew ? ' pop-in' : ''}">${r.value}</span>`;
     list.appendChild(div);
 
     renderedResults.set(i, { cat: r.cat, value: r.value });
@@ -202,10 +206,9 @@ function updateProgress() {
 }
 
 function setFinished() {
-  document.getElementById('mainBtn').textContent = 'Done!';
+  setMainBtnLabel('Done!');
   document.getElementById('mainBtn').disabled = true;
   document.getElementById('allBtn').style.display = 'none';
-  document.getElementById('resetBtn').style.display = '';
 }
 
 function resetRoller() {
@@ -220,13 +223,43 @@ function resetRoller() {
   document.getElementById('resultSub').textContent = '';
   document.getElementById('diceBadge').textContent = '';
   document.getElementById('rollsList').innerHTML = '';
-  document.getElementById('mainBtn').textContent = 'Start rolling';
+  setMainBtnLabel('Start rolling');
   document.getElementById('mainBtn').disabled = false;
   document.getElementById('allBtn').style.display = '';
   document.getElementById('rerollBtn').style.display = 'none';
   document.getElementById('resetBtn').style.display = 'none';
   document.getElementById('progress').textContent = '';
 }
+
+// --- Hotkeys ---
+
+document.addEventListener('keydown', (e) => {
+  const tag = document.activeElement?.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  if (document.getElementById('tab-roller').style.display === 'none') return;
+
+  const mainBtn = document.getElementById('mainBtn');
+  const allBtn = document.getElementById('allBtn');
+  const rerollBtn = document.getElementById('rerollBtn');
+  const resetBtn = document.getElementById('resetBtn');
+
+  switch (e.code) {
+    case 'Space':
+    case 'Enter':
+      e.preventDefault();
+      if (!mainBtn.disabled) mainBtn.click();
+      break;
+    case 'KeyA':
+      if (allBtn.style.display !== 'none') allBtn.click();
+      break;
+    case 'KeyR':
+      if (rerollBtn.style.display !== 'none') rerollBtn.click();
+      break;
+    case 'KeyS':
+      if (resetBtn.style.display !== 'none') resetBtn.click();
+      break;
+  }
+});
 
 // --- Tabs ---
 

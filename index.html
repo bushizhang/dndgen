@@ -27,10 +27,10 @@
       </div>
 
       <div class="btn-row">
-        <button class="primary" id="mainBtn" onclick="rollOne()">Start rolling</button>
-        <button id="allBtn" onclick="rollAll()">Roll all at once</button>
-        <button id="rerollBtn" onclick="rerollLast()" style="display:none">Reroll last</button>
-        <button id="resetBtn" onclick="resetRoller()" style="display:none">Start over</button>
+        <button class="primary" id="mainBtn" onclick="rollOne()" title="Shortcut: Space">Start rolling<span class="hotkey">Space</span></button>
+        <button id="allBtn" onclick="rollAll()" title="Shortcut: A">Roll all at once<span class="hotkey">A</span></button>
+        <button id="rerollBtn" onclick="rerollLast()" style="display:none" title="Shortcut: R">Reroll last<span class="hotkey">R</span></button>
+        <button id="resetBtn" onclick="resetRoller()" style="display:none" title="Shortcut: S">Start over<span class="hotkey">S</span></button>
       </div>
 
       <div class="progress" id="progress"></div>
