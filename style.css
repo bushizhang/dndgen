@@ -38,7 +38,7 @@ body {
 
 #app {
   width: 100%;
-  max-width: 640px;
+  max-width: 760px;
 }
 
 /* Header */
@@ -235,6 +235,21 @@ button.primary {
   background: var(--text);
   color: var(--bg);
   border-color: var(--text);
+}
+
+.btn-row-secondary {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+#mainBtn {
+  min-width: 22em;
+  max-width: 22em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 button.primary:hover {
